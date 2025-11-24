@@ -42,12 +42,13 @@ export class Block {
   }
 
   public mineBlock(difficulty: number): void {
-    const numberOfWorkers = 5;
+    const numberOfWorkers = 10;
     const workers: Worker[] = [];
+    const startTime = Date.now();
     for (let i = 0; i < numberOfWorkers; i++) {
       const worker = new Worker(path.resolve(__dirname, "worker.js"));
       workers.push(worker);
-      worker.postMessage({
+      const data = {
         index: this.index,
         data: JSON.stringify(this.data),
         prevHash: this.prevHash,
@@ -55,7 +56,8 @@ export class Block {
         difficulty,
         offset: i + 1,
         step: numberOfWorkers,
-      });
+      };
+      worker.postMessage(data);
       let solved = false;
       worker.on("message", (msg) => {
         if (solved) return;
@@ -64,13 +66,17 @@ export class Block {
           this.hash = msg.hash;
           this.nonce = msg.nonce;
           console.log(`✔ Solution found by worker ${i}`, msg);
+          console.log("for data: ", data);
+          const endTime = Date.now();
+          const executionTime = endTime - startTime;
+          console.log(`Execution time: ${executionTime} ms`);
           for (const w of workers) {
             w.terminate();
           }
         }
       });
-    //   worker.on("error", () => {});
-    //   worker.on("exit", () => {});
+        worker.on("error", () => {});
+        worker.on("exit", () => {});
     }
   }
 }
@@ -84,4 +90,4 @@ const block = new Block(
   },
   "23-11-2025"
 );
-block.mineBlock(5);
+block.mineBlock(6);

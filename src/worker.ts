@@ -13,10 +13,12 @@ interface Job {
 
 parentPort!.on("message", (job: Job) => {
   const target = "0".repeat(job.difficulty);
-
+  let counter = 0;
   let nonce = job.offset;
   while (true) {
-    console.log("trying nonce: ", nonce, ", by worker: ", job.offset);
+    // if (counter % 1000000*job.offset === 0) {
+    //   console.log(`Worker ${job.offset} trying nonce ${nonce}`);
+    // }
     const raw =
       job.index + job.prevHash + job.timestamp + job.data + nonce.toString();
 
@@ -32,5 +34,6 @@ parentPort!.on("message", (job: Job) => {
     }
 
     nonce += job.step;
+    counter++;
   }
 });
