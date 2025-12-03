@@ -1,5 +1,5 @@
 import { parentPort } from "worker_threads";
-import { Job } from "./worker-job-type";
+import { Job } from "./interfaces";
 import crypto from "crypto";
 
 let shouldStop = false;
